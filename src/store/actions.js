@@ -1,12 +1,13 @@
 /*
 * vuex的actions模块
 * */
-import {reqAddress,reqFoodCategorys,reqShops,reqSearchShops} from '../api'
+import {reqAddress,reqFoodCategorys,reqShops,reqUser,reqLogout} from '../api'
 import {
   RECEIVE_ADDRESS,
   RECEIVE_CATEGORYS,
   RECEIVE_SHOPS,
-  RECEIVE_SEARCHSHOPS
+  RECEIVE_USER,
+  RESET_USER
 } from './mutation-types'
 
 export default {
@@ -38,12 +39,32 @@ export default {
     }
   },
   //异步根据经纬度和关键字搜索商家列表
-  async getSearchShops({commit,state},keyword){
+ /* async getSearchShops({commit,state},keyword){
     const {latitude,longitude} = state
     const result = await reqSearchShops(latitude+','+longitude,keyword)
     if (result.code ===0) {
       const searchShops = result.data
       commit(RECEIVE_SEARCHSHOPS,{searchShops})
     }
+  }*/
+  //同步获取user
+  saveUser ({commit},user) {
+    commit(RECEIVE_USER,{user})
+  },
+  //异步获取用户的action
+  async getUser ({commit}){
+    const result = await reqUser()
+    if (result.code === 0){
+      const user = result.data
+      commit(RECEIVE_USER,{user})
+    }
+  },
+  //异步退出登录
+  async logout ({commit}) {
+    const result = await reqLogout()
+    if (result.code===0){
+      commit(RESET_USER)
+    }
   }
+
 }

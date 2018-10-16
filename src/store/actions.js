@@ -1,70 +1,132 @@
 /*
-* vuex的actions模块
-* */
-import {reqAddress,reqFoodCategorys,reqShops,reqUser,reqLogout} from '../api'
+包含n个用于间接更新状态数据方法的对象
+ */
 import {
-  RECEIVE_ADDRESS,
-  RECEIVE_CATEGORYS,
+  reqAddress,
+  reqFoodCategorys,
+  reqShops,
+  reqUser,
+  reqLogout,
+  reqInfo,
+  reqRatings,
+  reqGoods,
+} from '../api'
+
+import {
   RECEIVE_SHOPS,
+  RECEIVE_CATEGORYS,
+  RECEIVE_ADDRESS,
   RECEIVE_USER,
-  RESET_USER
+  RESET_USER,
+  RECEIVE_GOODS,
+  RECEIVE_RATINGS,
+  RECEIVE_INFO,
+  INCREMENT_FOOD_COUNT,
+  DECREMENT_FOOD_COUNT,
+  CLEAR_CART
 } from './mutation-types'
 
 export default {
-  //异步获取地址
-  async getAddress({commit,state}){
-    const {latitude,longitude} = state
-    const result = await reqAddress(latitude+','+longitude)
-    if (result.code === 0){
-      const address = result.data
-      commit(RECEIVE_ADDRESS,{address})
-    }
-  },
-  //异步获取分类列表
-  async getCategorys({commit}){
-    const result = await reqFoodCategorys()
-    if (result.code===0){
-      const categorys = result.data
-      commit(RECEIVE_CATEGORYS,{categorys})
 
+  // 异步获取address
+  async getAddress ({commit, state}) {
+    // 发送ajax请求
+    const {latitude, longitude} = state
+    const result = await reqAddress(latitude+','+longitude)   // {code: 0, data: address}
+    if(result.code===0) {
+      const address = result.data
+      // commit给mutation
+      commit(RECEIVE_ADDRESS, {address})
     }
   },
-  //异步获取商家列表
-  async getShops({commit,state}){
-    const {latitude,longitude} = state
-    const result = await reqShops(longitude,latitude)
-    if (result.code === 0){
+
+  // 异步获取categorys
+  async getCategorys ({commit}) {
+    // 发送ajax请求
+    const result = await reqFoodCategorys()
+    if(result.code===0) {
+      const categorys = result.data
+      // commit给mutation
+      commit(RECEIVE_CATEGORYS, {categorys})
+    }
+  },
+
+
+  // 异步获取shops
+  async getShops ({commit, state}) {
+    // 发送ajax请求
+    const {latitude, longitude} = state
+    const result = await reqShops(longitude, latitude)
+    if(result.code===0) {
       const shops = result.data
-      commit(RECEIVE_SHOPS,{shops})
+      // commit给mutation
+      commit(RECEIVE_SHOPS, {shops})
     }
   },
-  //异步根据经纬度和关键字搜索商家列表
- /* async getSearchShops({commit,state},keyword){
-    const {latitude,longitude} = state
-    const result = await reqSearchShops(latitude+','+longitude,keyword)
-    if (result.code ===0) {
-      const searchShops = result.data
-      commit(RECEIVE_SEARCHSHOPS,{searchShops})
-    }
-  }*/
-  //同步获取user
-  saveUser ({commit},user) {
-    commit(RECEIVE_USER,{user})
+
+  // 同步保存用户的action
+  saveUser ({commit}, user) {
+    commit(RECEIVE_USER, {user})
   },
-  //异步获取用户的action
-  async getUser ({commit}){
+
+  // 异步获取用户的action
+  async getUser ({commit}) {
     const result = await reqUser()
-    if (result.code === 0){
+    if(result.code===0) {
       const user = result.data
-      commit(RECEIVE_USER,{user})
+      commit(RECEIVE_USER, {user})
     }
   },
-  //异步退出登录
+
+  // 异步退出登陆的action
   async logout ({commit}) {
     const result = await reqLogout()
-    if (result.code===0){
+    if(result.code===0) {
       commit(RESET_USER)
     }
+  },
+
+  // 异步获取goods数据
+  async getGoods ({commit}, cb) {
+    const result = await reqGoods()
+    if(result.code===0) {
+      const goods = result.data
+      commit(RECEIVE_GOODS, {goods})
+      // 在更新状态后立即调用
+      typeof cb ==='function' && cb()
+    }
+  },
+
+  // 异步获取ratings数据
+  async getRatings ({commit}) {
+    const result = await reqRatings()
+    if(result.code===0) {
+      const ratings = result.data
+      commit(RECEIVE_RATINGS, {ratings})
+    }
+  },
+
+  // 异步获取info数据
+  async getInfo ({commit}) {
+    const result = await reqInfo()
+    if(result.code===0) {
+      const info = result.data
+      commit(RECEIVE_INFO, {info})
+    }
+  },
+
+  //更新食物数量
+  updateFoodCount({commit},{isAdd,food}){
+    if (isAdd){
+      commit(INCREMENT_FOOD_COUNT,{food})
+    }else {
+      commit(DECREMENT_FOOD_COUNT,{food})
+    }
+  },
+
+  //清空购物车
+  clearCart({commit}) {
+    commit(CLEAR_CART)
   }
 
 }
